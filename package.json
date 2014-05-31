@@ -1,0 +1,25 @@
+{
+  "name": "batman_starter",
+  "version": "0.0.0",
+  "description": "Starter kit for a batman.js app",
+  "main": "readme.md",
+  "scripts": {
+    "test": "gulp test"
+  },
+  "keywords": [
+    "batman.js",
+    "mvc",
+    "starter"
+  ],
+  "author": "Robert Mosolgo",
+  "license": "MIT",
+  "devDependencies": {
+    "coffee-script": "^1.7.1",
+    "firebase-tools": "^1.0.4",
+    "gulp": "^3.6.2",
+    "gulp-batman-templates": "0.0.1",
+    "gulp-coffee": "^1.4.3",
+    "gulp-concat": "^2.2.0",
+    "harp": "^0.12.1"
+  }
+}
