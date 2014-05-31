@@ -1,0 +1,1 @@
+class App.GreetingsIndexView extends Batman.View

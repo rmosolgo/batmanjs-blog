@@ -5,7 +5,7 @@ This kit includes:
 - [Batman.js](http://batmanjs.org), all [dependencies](https://github.com/rmosolgo/batman-starter/tree/master/vendor) and a skeletal batman.js app
 - [Karma](http://karma-runner.github.io/0.12/index.html)/[Jasmine](http://jasmine.github.io/2.0/introduction.html) test suite
 - Development server ([harp.js](http://harpjs.com/)), build scripts and test scripts powered by [gulp.js](http://gulpjs.com/)
-- Integration with [Firebase](http://firebase.com), a front-end-friendly real-time datastore (with a free tier).
+- Integration with [Firebase](http://firebase.com) (via [BatFire](https://github.com/rmosolgo/batfire)), a front-end-friendly real-time datastore (with a free tier).
 
 # Install & Use
 
@@ -31,7 +31,7 @@ This kit includes:
   $ gulp
   ```
 
-- Open up the landing page: http://localhost:9000
+- Open up the landing page: [http://localhost:9000](http://localhost:9000)
 
 # A Closer Look...
 
@@ -50,7 +50,7 @@ There's your app!
 
 ## Specs
 
-__I couldn't get Batman.TestCase to play nice with Karma, so I chose Jasmine instead!__
+_I couldn't get Batman.TestCase to play nice with Karma, so I chose Jasmine instead!_
 
 - Specs live in `spec/`
 - Any global setup (macros, etc) can be put in `spec/support/spec_helper.coffee`.
