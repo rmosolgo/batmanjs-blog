@@ -7,7 +7,7 @@ module.exports = (config) ->
       'karma-jasmine',
     ]
     preprocessors: {
-      '../spec/**/*_spec.coffee': ['coffee']
+      '../spec/**/*.coffee': ['coffee']
     }
     frameworks: ["jasmine"]
     files: [
@@ -16,6 +16,7 @@ module.exports = (config) ->
       '../vendor/*.js'
       '../build/app.js'
       '../build/templates.js'
+      '../spec/support/spec_helper.coffee'
       '../spec/**/*_spec.coffee'
     ]
     exclude: []

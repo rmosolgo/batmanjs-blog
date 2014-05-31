@@ -1,7 +1,5 @@
 var gulp = require('gulp');
-
-// Set this to true if you want to preload views ...
-var PRELOAD_VIEWS = false
+var PRELOAD_TEMPLATES = false
 
 gulp.task('default', ['harp', 'spec'], function(){
   var tasks = ["build"]
@@ -42,7 +40,7 @@ gulp.task("build_html", function(){
 
 var appTasks = ["build_app", "build_html"]
 // Only include the templates in application.js if PRELOAD VIEWS
-var finalSources = PRELOAD_VIEWS ? ["./build/app.js", "./build/templates.js"] : ["./build/app.js"]
+var finalSources = PRELOAD_TEMPLATES ? ["./build/app.js", "./build/templates.js"] : ["./build/app.js"]
 
 gulp.task("build", appTasks, function() {
   gulp.src(finalSources)
