@@ -3,7 +3,7 @@ var gulp = require('gulp');
 // Set this to true if you want to preload views ...
 var PRELOAD_VIEWS = false
 
-gulp.task('default', ['harp'], function(){
+gulp.task('default', ['harp', 'spec'], function(){
   var tasks = ["build"]
   gulp.watch('./**/*.coffee', tasks)
   gulp.watch('./**/*.html', tasks)
@@ -40,7 +40,8 @@ gulp.task("build_html", function(){
   return stream
 })
 
-var appTasks = PRELOAD_VIEWS ? ["build_app", "build_html"] : ["build_app"]
+var appTasks = ["build_app", "build_html"]
+// Only include the templates in application.js if PRELOAD VIEWS
 var finalSources = PRELOAD_VIEWS ? ["./build/app.js", "./build/templates.js"] : ["./build/app.js"]
 
 gulp.task("build", appTasks, function() {
@@ -65,4 +66,15 @@ var startHarp = function(port){
 gulp.task("harp", function(){
   startHarp(HARP_PORT)
   true
+})
+
+// KARMA TEST RUNNER
+var karma = require('gulp-karma')
+gulp.task("spec", function(){
+  var stream = gulp.src("./bogus") // weird thing about gulp-karma: https://github.com/lazd/gulp-karma/issues/27
+      .pipe(karma({
+        configFile: './spec/support/config.coffee',
+        action: 'watch'
+      }))
+  return true
 })
