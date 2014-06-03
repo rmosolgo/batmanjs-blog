@@ -1,0 +1,16 @@
+<form data-formfor-post='post' data-event-submit='savePost | withArguments post'>
+  <div class='errors alert alert-warning' data-showif='post.errors.length'>
+  </div>
+  <div class='form-group'>
+    <label>Title</label>
+    <input type='text' class='form-control' data-bind='post.title' />
+  </div>
+  <div class='form-group'>
+    <label>Content</label>
+    <textarea class='form-control' data-bind='post.content'></textarea>
+  </div>
+  <div class='form-group'>
+    <input type='submit' class='btn btn-primary' value='Save' />
+    <a class='btn btn-danger' data-route='routes.posts'>Cancel</a>
+  </div>
+</form>

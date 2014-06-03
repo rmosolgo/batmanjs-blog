@@ -4,9 +4,11 @@
     <!-- include dependencies -->
     <script type='text/javascript' src="/vendor/jquery.js"></script>
     <script type='text/javascript' src='/vendor/firebase.js'></script>
+    <script type='text/javascript' src='/vendor/firebase-simple-login.js'></script>
     <script type='text/javascript' src="/vendor/batman.js"></script>
     <script type='text/javascript' src="/vendor/batman.jquery.js"></script>
     <script type='text/javascript' src="/vendor/batfire.js"></script>
+    <script type='text/javascript' src="/vendor/moment.js"></script>
     <!-- include bootstrap just for fun -->
     <script type='text/javascript' src="/vendor/bootstrap.js"></script>
     <link type="text/css" rel="stylesheet" href="/vendor/bootstrap.css" />
@@ -15,17 +17,7 @@
   </head>
   <body>
     <header class='container'>
-      <div class='row'>
-        <div class='jumbotron'>
-          <h1>Welcome to batman.js!</h1>
-          <p>
-            Check out the
-            <a href="https://github.com/rmosolgo/batman-starter">readme</a> or
-            <!-- <a href="#">tutorial</a>, or -->
-            <a href="http://batmanjs.org">website</a>!
-          </p>
-        </div>
-      </div>
+      <div class='row' data-view='NavBarView'></div>
     </header>
     <section class='container'>
       <div data-yield='main'></div>

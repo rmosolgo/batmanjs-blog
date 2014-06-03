@@ -1,0 +1,33 @@
+<div class='row'>
+  <h1 class='col-sm-12'>
+    <span data-bind='"Post" | pluralize posts.length'></span>
+  </h1>
+</div>
+<ul class='list-unstyled'>
+  <li data-foreach-post='posts'>
+    <div class='row'>
+      <a data-route='routes.posts[post]'>
+        <p class='lead col-sm-4' data-bind='post.title'></p>
+      </a>
+      <div class='col-sm-2'>
+        <a data-showif='post.isOwnedByCurrentUser' class='btn btn-warning pull-right' data-route='routes.posts[post].edit'>Edit</a>
+      </div>
+      <div class='col-sm-2'>
+        <a data-showif='post.isOwnedByCurrentUser' class='btn btn-danger pull-right' data-event-click='destroyPost | withArguments post'>Delete</a>
+      </div>
+      <span class='text-muted col-sm-4'>
+        Posted
+        <span class="timeago" data-bind="post.created_at | timeago"></span>
+      </span>
+    </div>
+    <div class='row'>
+      <p class='col-sm-12' data-bind='post.content | truncate 100'></p>
+    </div>
+  </li>
+</ul>
+<div class='row' data-showif='isAdmin'>
+  <div class='col-sm-2'>
+    <a class='btn btn-default' data-route='routes.posts.new'>New Post</a>
+  </div>
+</div>
+

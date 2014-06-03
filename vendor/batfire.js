@@ -105,7 +105,7 @@
       var firebaseClass, _BatFireClearLoaded,
         _this = this;
       Storage.__super__.constructor.apply(this, arguments);
-      this.firebaseClass = firebaseClass = Batman.helpers.pluralize(this.model.storageKey || this.model.resourceName);
+      firebaseClass = Batman.helpers.pluralize(this.model.storageKey || this.model.resourceName);
       this.model.encode(this.model.get('primaryKey'));
       _BatFireClearLoaded = this.model.clear;
       this.model.clear = function() {
@@ -118,27 +118,29 @@
         _this.model.unset('ref');
         return result;
       };
-      this.model.generateFirebasePath = function() {
+      this.model.classAccessor('firebasePath', function() {
         var children, uid;
         children = ['records'];
         if (this.get('isScopedToCurrentUser')) {
           uid = Batman.currentApp.get('currentUser.uid');
           if (uid == null) {
-            throw "" + this.model.resourceName + " is scoped to currentUser -- you must be logged in to access it!";
+            throw "" + firebaseClass + " is scoped to currentUser -- you must be logged in to access it!";
           }
           children.push('scoped');
           children.push(uid);
         }
         children.push(firebaseClass);
         return children.join("/");
-      };
-      this.model.prototype.generateFirebasePath = function() {
+      });
+      this.model.accessor('firebasePath', function() {
         var children, uid;
         children = ['records'];
         if (this.get('isScopedToCurrentUser')) {
-          uid = this.get('created_by_uid');
+          uid = this.get('isNew') ? Batman.currentApp.get('currentUser.uid') : this.get('created_by_uid');
           if (uid == null) {
-            throw "" + this.constructor.resourceName + " is scoped to currentUser -- you must be logged in to access it!";
+            debugger;
+            console.log(this.toJSON());
+            throw "" + firebaseClass + " " + (this.get("id") || 'record') + " is scoped to currentUser -- you must be logged in to access them!";
           }
           children.push('scoped');
           children.push(uid);
@@ -148,33 +150,56 @@
           children.push(this.get('id'));
         }
         return children.join("/");
+      });
+      this.model.encodesTimestamps = function() {
+        this.accessor('_encodesTimestamps', function() {
+          return true;
+        });
+        return this.encode('created_at', 'updated_at', {
+          encode: function(value) {
+            return value.toISOString();
+          },
+          decode: function(value) {
+            return new Date(value);
+          }
+        });
       };
     }
 
     Storage.prototype._createRef = function(env) {
-      var firebaseChildPath;
-      firebaseChildPath = env.subject.generateFirebasePath();
-      return Batman.currentApp.get('firebase').child(firebaseChildPath);
+      var e, firebaseChildPath, ref;
+      try {
+        firebaseChildPath = env.subject.get('firebasePath');
+        ref = Batman.currentApp.get('firebase').child(firebaseChildPath);
+        if (env.action === 'create') {
+          ref = ref.push();
+        }
+      } catch (_error) {
+        e = _error;
+        env.error = e;
+      }
+      return ref;
     };
 
-    Storage.prototype._listenToList = function(ref) {
+    Storage.prototype._listenToList = function(ref, callback) {
       var _this = this;
-      if (!this.model.get('ref')) {
-        ref.on('child_added', function(snapshot) {
-          var record;
-          return record = _this.model.createFromJSON(snapshot.val());
-        });
-        ref.on('child_removed', function(snapshot) {
-          var record;
-          record = _this.model.createFromJSON(snapshot.val());
-          return _this.model.get('loaded').remove(record);
-        });
-        ref.on('child_changed', function(snapshot) {
-          var record;
-          return record = _this.model.createFromJSON(snapshot.val());
-        });
-        return this.model.set('ref', ref);
+      if (this.model.get('ref')) {
+        return;
       }
+      ref.on('child_added', function(snapshot) {
+        var record;
+        return record = _this.model.createFromJSON(snapshot.val());
+      });
+      ref.on('child_removed', function(snapshot) {
+        var record;
+        record = _this.model.createFromJSON(snapshot.val());
+        return _this.model.get('loaded').remove(record);
+      });
+      ref.on('child_changed', function(snapshot) {
+        var record;
+        return record = _this.model.createFromJSON(snapshot.val());
+      });
+      return this.model.set('ref', ref);
     };
 
     Storage.prototype.before('destroy', 'destroyAll', Storage.skipIfError(function(env, next) {
@@ -190,14 +215,8 @@
     }));
 
     Storage.prototype.before('create', 'update', 'read', 'destroy', 'readAll', 'destroyAll', Storage.skipIfError(function(env, next) {
-      var ref;
       env.primaryKey = this.model.primaryKey;
-      ref = this._createRef(env);
-      if (env.action === 'create') {
-        env.firebaseRef = ref.push();
-      } else {
-        env.firebaseRef = ref;
-      }
+      env.firebaseRef = this._createRef(env);
       return next();
     }));
 
@@ -206,21 +225,27 @@
       return next();
     }));
 
-    Storage.prototype.after('readAll', Storage.skipIfError(function(env, next) {
-      env.result = [];
-      return next();
-    }));
-
     Storage.prototype.create = Storage.skipIfError(function(env, next) {
       var firebaseId;
       firebaseId = env.firebaseRef.name();
       env.subject._withoutDirtyTracking(function() {
+        var attr, _i, _len, _ref;
+        if (env.subject.get('_encodesTimestamps')) {
+          this.set('created_at', new Date);
+          this.set('updated_at', new Date);
+        }
+        if (env.subject.get('_belongsToCurrentUser')) {
+          _ref = BatFire.AuthModelMixin.CREATED_BY_FIELDS;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            attr = _ref[_i];
+            this.set("created_by_" + attr, Batman.currentApp.get('currentUser').get(attr));
+          }
+        }
         return this.set(env.primaryKey, firebaseId);
       });
       return env.firebaseRef.set(env.subject.toJSON(), function(err) {
         if (err) {
           env.error = err;
-          console.log(err);
         }
         return next();
       });
@@ -243,6 +268,11 @@
     });
 
     Storage.prototype.update = Storage.skipIfError(function(env, next) {
+      env.subject._withoutDirtyTracking(function() {
+        if (env.subject.get('_encodesTimestamps')) {
+          return this.set('updated_at', new Date);
+        }
+      });
       return env.firebaseRef.set(env.subject.toJSON(), function(err) {
         if (err) {
           env.error = err;
@@ -261,8 +291,22 @@
     });
 
     Storage.prototype.readAll = Storage.skipIfError(function(env, next) {
+      var _this = this;
       this._listenToList(env.firebaseRef);
-      return next();
+      return env.firebaseRef.once('value', function(listSnapshot) {
+        var id, item, listData;
+        listData = listSnapshot.val();
+        env.result = (function() {
+          var _results;
+          _results = [];
+          for (id in listData) {
+            item = listData[id];
+            _results.push(env.subject.createFromJSON(item));
+          }
+          return _results;
+        })();
+        return next();
+      });
     });
 
     Storage.prototype.destroyAll = Storage.skipIfError(function(env, next) {
@@ -363,11 +407,15 @@
     CurrentUserValidator.triggers('ownedByCurrentUser');
 
     CurrentUserValidator.prototype.validateEach = function(errors, record, key, callback) {
-      if (!record.isNew()) {
+      if (!record.get('isNew')) {
         if (!record.get('hasOwner')) {
-          errors.add('created_by_uid', "This record doesn't have an owner!");
+          errors.add('base', "This record doesn't have an owner!");
         } else if (!record.get('isOwnedByCurrentUser')) {
-          errors.add('created_by_uid', "You don't own this record!");
+          errors.add('base', "You don't own this record!");
+        }
+      } else {
+        if (!Batman.currentApp.get('loggedIn')) {
+          errors.add('base', "You must be logged in to create this!");
         }
       }
       return callback();
@@ -380,33 +428,17 @@
   Batman.Validators.push(BatFire.CurrentUserValidator);
 
   BatFire.AuthModelMixin = {
+    CREATED_BY_FIELDS: ['uid', 'email', 'username'],
     initialize: function() {
       return this.belongsToCurrentUser = function(_arg) {
         var attr, ownership, scoped, _fn, _i, _len, _ref2, _ref3,
           _this = this;
         _ref2 = _arg != null ? _arg : {}, scoped = _ref2.scoped, ownership = _ref2.ownership;
-        _ref3 = ['uid', 'email', 'username'];
+        _ref3 = BatFire.AuthModelMixin.CREATED_BY_FIELDS;
         _fn = function(attr) {
           var accessorName;
           accessorName = "created_by_" + attr;
-          _this.accessor(accessorName, {
-            get: function() {
-              var _base;
-              if (this._currentUserAttrs == null) {
-                this._currentUserAttrs = {};
-              }
-              return (_base = this._currentUserAttrs)[attr] != null ? (_base = this._currentUserAttrs)[attr] : _base[attr] = Batman.currentApp.get("currentUser." + attr);
-            },
-            set: function(key, value) {
-              if (this._currentUserAttrs == null) {
-                this._currentUserAttrs = {};
-              }
-              return this._currentUserAttrs[attr] = value;
-            }
-          });
-          _this.accessor(Batman.helpers.camelize(accessorName), function() {
-            return this.get(accessorName);
-          });
+          _this.accessor(accessorName, Batman.Model.defaultAccessor);
           return _this.encode(accessorName);
         };
         for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
@@ -417,7 +449,11 @@
           return this.get('created_by_uid') != null;
         });
         this.accessor('isOwnedByCurrentUser', function() {
-          return this.get('created_by_uid') && this.get('created_by_uid') === Batman.currentApp.get('currentUser.uid');
+          return this.get('hasOwner') && this.get('created_by_uid') === Batman.currentApp.get('currentUser.uid');
+        });
+        this.set('_belongsToCurrentUser', true);
+        this.accessor('_belongsToCurrentUser', function() {
+          return true;
         });
         if (ownership) {
           this.validate('created_by_uid', {
@@ -425,7 +461,7 @@
           });
           this.set('hasUserOwnership', true);
           this.accessor('hasUserOwnership', function() {
-            return this.constructor.get('hasUserOwnership');
+            return true;
           });
           this.encode('hasUserOwnership', {
             as: 'has_user_ownership'
