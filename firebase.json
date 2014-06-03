@@ -1,0 +1,12 @@
+{
+  "firebase": "batman-blog",
+  "public": "./",
+  "rules": "config/security_rules.json",
+  "ignore": [
+    "firebase.json",
+    "package.json",
+    "Gulpfile.js",
+    "spec/",
+    "**/node_modules/**"
+  ]
+}

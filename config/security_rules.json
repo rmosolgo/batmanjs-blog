@@ -1,0 +1,37 @@
+/* These rules are provided for imformational purposes only :) */
+{
+  "rules": {
+    /* All items are namespaced by `BatFire` */
+    "BatFire" : {
+      /* Make `@syncs` accessors read-only */
+      "syncs" : {
+        ".read" : true,
+        ".write" : false
+      },
+      /* All records namespaced by `records` */
+      "records" : {
+        "scoped" : {
+          /* "Server-side" validation for @belongsToCurrentUser(scoped: true) */
+          "$uid" : {
+            ".write" : "$uid == auth.uid",
+            ".read" : "$uid == auth.uid"
+          }
+        },
+        "$resourceName" : {
+          /* "Server-side" validation for @belongsToCurrentUser(ownership: true) */
+          "$recordId" : {
+            /* Allows non-belongsToCurrentUser records to be written but protect owned ones */
+            ".write" : "!data.hasChild('has_user_ownership') || data.child('created_by_uid').val() == auth.uid"
+          },
+          ".read" : true
+          /* nothing gets written here -- everything gets an ID _before_ create */
+        }
+      }
+    },
+    /* Everything else is fair game */
+    "$other" : {
+      ".read" : true,
+      ".write" : true
+    }
+  }
+}
