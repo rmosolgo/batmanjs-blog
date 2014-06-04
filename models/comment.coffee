@@ -4,5 +4,8 @@ class App.Comment extends Batman.Model
   @encode 'content'
   @belongsTo 'post'
   @validate 'content', presence: true
-  @belongsToCurrentUser(ownership: true)
+  @belongsToCurrentUser()
   @encodesTimestamps()
+
+  @accessor 'canBeDeleted', ->
+    @get('isOwnedByCurrentUser') || App.get('isAdmin')

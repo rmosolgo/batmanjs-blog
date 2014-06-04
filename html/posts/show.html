@@ -24,8 +24,11 @@
         <strong class='pull-right'>
           On <span data-bind='comment.created_at | moment "LL" '></span>, <span data-bind='comment.created_by_username'></span> said:
         </strong>
-        </p>
-      <p class='col-sm-8' data-bind='comment.content'></p>
+      </p>
+      <p class='col-sm-6' data-bind='comment.content'></p>
+      <div class='col-sm-2' data-showif='comment.canBeDeleted'>
+        <a class='btn btn-danger btn-xs' data-event-click='destroyComment | withArguments comment'> Delete </a>
+      </div>
     </li>
     <li class='col-sm-12' data-showif='post.comments.isEmpty'>
       <p class='text-muted'>No comments yet!</p>

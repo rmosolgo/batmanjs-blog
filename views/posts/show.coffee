@@ -10,3 +10,7 @@ class App.PostsShowView extends Batman.View
   _resetComment: ->
     comment = new App.Comment(post: @get('controller.post'))
     @set('newComment', comment)
+
+  destroyComment: (comment) ->
+    comment.destroy (err, r) ->
+      throw err if err?

@@ -21,6 +21,13 @@
           ".read" : true,
           ".write" : "'github:2231765' == auth.uid " /* that's me */
         },
+        "comments" : {
+          ".read" : true,
+          "$recordId" : {
+            /* can be deleted by creator or by admin ... me */
+            ".write" :  "!data.exists() || auth.uid == data.child('created_by_uid').val() || 'github:2231765' == auth.uid"
+          }
+        },
         "$resourceName" : {
           /* "Server-side" validation for @belongsToCurrentUser(ownership: true) */
           "$recordId" : {

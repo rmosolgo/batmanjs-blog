@@ -64,11 +64,13 @@
       presence: true
     });
 
-    Comment.belongsToCurrentUser({
-      ownership: true
-    });
+    Comment.belongsToCurrentUser();
 
     Comment.encodesTimestamps();
+
+    Comment.accessor('canBeDeleted', function() {
+      return this.get('isOwnedByCurrentUser') || App.get('isAdmin');
+    });
 
     return Comment;
 
@@ -250,6 +252,14 @@
         post: this.get('controller.post')
       });
       return this.set('newComment', comment);
+    };
+
+    PostsShowView.prototype.destroyComment = function(comment) {
+      return comment.destroy(function(err, r) {
+        if (err != null) {
+          throw err;
+        }
+      });
     };
 
     return PostsShowView;

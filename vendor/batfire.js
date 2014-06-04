@@ -243,6 +243,7 @@
         }
         return this.set(env.primaryKey, firebaseId);
       });
+      console.log("CREATING", env.subject.toJSON())
       return env.firebaseRef.set(env.subject.toJSON(), function(err) {
         if (err) {
           env.error = err;
