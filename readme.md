@@ -1,6 +1,6 @@
 # Batman.js blog
 
-This is a blog app built with [batman.js](http://batman.js) and [Firebase](http://firebase.com), using [BatFire](http://github.com/rmosolgo/batfire) bindings.
+This is a blog app built with [batman.js](http://batman.js) and [Firebase](http://firebase.com), using [BatFire](http://github.com/rmosolgo/batfire) bindings. It's based on the [batmanjs-starter](http://github.com/rmosolgo/batmanjs-starter) template.
 
 Online at [batman-blog.firebaseapp.com](https://batman-blog.firebaseapp.com/)
 
