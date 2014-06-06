@@ -102,4 +102,15 @@
 
   })(App.ApplicationController);
 
+  App.GreetingsIndexView = (function(_super) {
+    __extends(GreetingsIndexView, _super);
+
+    function GreetingsIndexView() {
+      return GreetingsIndexView.__super__.constructor.apply(this, arguments);
+    }
+
+    return GreetingsIndexView;
+
+  })(Batman.View);
+
 }).call(this);

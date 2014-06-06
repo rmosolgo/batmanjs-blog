@@ -4,6 +4,7 @@
     <!-- include dependencies -->
     <script type='text/javascript' src="/vendor/jquery.js"></script>
     <script type='text/javascript' src='/vendor/firebase.js'></script>
+    <script type='text/javascript' src='/vendor/firebase-simple-login.js'></script>
     <script type='text/javascript' src="/vendor/batman.js"></script>
     <script type='text/javascript' src="/vendor/batman.jquery.js"></script>
     <script type='text/javascript' src="/vendor/batfire.js"></script>
@@ -15,17 +16,21 @@
   </head>
   <body>
     <header class='container'>
-      <div class='row'>
-        <div class='jumbotron'>
-          <h1>Welcome to batman.js!</h1>
-          <p>
-            Check out the
-            <a href="https://github.com/rmosolgo/batman-starter">readme</a> or
-            <!-- <a href="#">tutorial</a>, or -->
-            <a href="http://batmanjs.org">website</a>!
-          </p>
+      <nav class="navbar navbar-default" role="navigation">
+        <div class="navbar-header">
+          <a class="navbar-brand" data-route='routes.root'>Welcome to batman.js!</a>
         </div>
-      </div>
+        <ul class="nav navbar-nav">
+          <li><a href="http://github.com/rmosolgo/batmanjs-starter">Readme</a></li>
+          <li><a href="#">Tutorial</a></li>
+          <li><a href="http://batmanjs.org">Batman.js</a></li>
+        </ul>
+        <!-- requires `@authorizesWithFirebase`
+        <button data-showif='loggedIn' class='btn btn-default navbar-btn navbar-right' data-event-click='logout'>Log Out</button>
+        <span data-showif='loggedIn' class='navbar-right navbar-text' data-bind='"Welcome, " | append currentUser.username | append "!"'></span>
+        <button data-showif='loggedOut' class='navbar-right btn btn-default navbar-btn'  data-event-click='login | withArguments "github"'>Log In</button>
+        -->
+      </nav>
     </header>
     <section class='container'>
       <div data-yield='main'></div>

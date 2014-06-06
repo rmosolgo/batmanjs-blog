@@ -6,7 +6,6 @@ class @App extends Batman.App
 
   @syncsWithFirebase "batfire-example" # <= your firebase key here (see rmosolgo/batfire for more info)
 
-  @on 'run', ->
-    console.warn "Add your firebase key to ./app.coffee, then remove this warning!"
+  @on 'run', -> console.warn "Add your firebase key to ./app.coffee, then remove this warning!"
 
 $ -> App.run()
