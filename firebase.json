@@ -1,5 +1,5 @@
 {
-  "firebase": "batman-blog",
+  "firebase": "rm-batmanjs-blog",
   "public": "./",
   "rules": "config/security_rules.json",
   "ignore": [
