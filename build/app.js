@@ -15,7 +15,7 @@
 
     App.resources('posts');
 
-    App.syncsWithFirebase("batman-blog");
+    App.syncsWithFirebase("rm-batmanjs-blog");
 
     App.authorizesWithFirebase();
 
@@ -68,6 +68,11 @@
 
     Comment.encodesTimestamps();
 
+    Comment.accessor('createdAtFormatted', function() {
+      var _ref;
+      return (_ref = this.get('created_at')) != null ? _ref.toDateString() : void 0;
+    });
+
     Comment.accessor('canBeDeleted', function() {
       return this.get('isOwnedByCurrentUser') || App.get('isAdmin');
     });
@@ -89,15 +94,6 @@
 
     Post.encode('title', 'content');
 
-    Post.encode('created_at', {
-      encode: function(value) {
-        return value.toString();
-      },
-      decode: function(value) {
-        return new Date(value);
-      }
-    });
-
     Post.hasMany('comments', {
       inverseOf: 'post'
     });
@@ -115,6 +111,11 @@
     });
 
     Post.encodesTimestamps();
+
+    Post.accessor('createdAtFormatted', function() {
+      var _ref;
+      return (_ref = this.get('created_at')) != null ? _ref.toDateString() : void 0;
+    });
 
     return Post;
 
@@ -141,13 +142,7 @@
     PostsController.prototype.routingKey = 'posts';
 
     PostsController.prototype.index = function() {
-      App.Post.load((function(_this) {
-        return function() {
-          _this.set('posts', App.Post.get('all.sortedByDescending.created_at'));
-          return _this.render();
-        };
-      })(this));
-      return this.render(false);
+      return this.set('posts', App.Post.get('all.sortedByDescending.created_at'));
     };
 
     PostsController.prototype["new"] = function() {
@@ -155,16 +150,14 @@
     };
 
     PostsController.prototype.show = function(params) {
-      App.Post.find(params.id, (function(_this) {
+      return App.Post.find(params.id, (function(_this) {
         return function(err, record) {
           if (err != null) {
             throw err;
           }
-          _this.set('post', record);
-          return _this.render();
+          return _this.set('post', record);
         };
       })(this));
-      return this.render(false);
     };
 
     PostsController.prototype.edit = function(params) {
@@ -252,6 +245,45 @@
         post: this.get('controller.post')
       });
       return this.set('newComment', comment);
+    };
+
+    PostsShowView.prototype.destroyComment = function(comment) {
+      return comment.destroy(function(err, r) {
+        if (err != null) {
+          throw err;
+        }
+      });
+    };
+
+    return PostsShowView;
+
+  })(Batman.View);
+
+  App.PostsShowView = (function(_super) {
+    __extends(PostsShowView, _super);
+
+    function PostsShowView() {
+      return PostsShowView.__super__.constructor.apply(this, arguments);
+    }
+
+    PostsShowView.prototype.viewWillAppear = function() {
+      return this._resetComment();
+    };
+
+    PostsShowView.prototype.saveComment = function(comment) {
+      comment.set('post', this.get('controller.post'));
+      return comment.save((function(_this) {
+        return function(err, record) {
+          if (err != null) {
+            throw err;
+          }
+          return _this._resetComment();
+        };
+      })(this));
+    };
+
+    PostsShowView.prototype._resetComment = function() {
+      return this.set('newComment', new App.Comment);
     };
 
     PostsShowView.prototype.destroyComment = function(comment) {

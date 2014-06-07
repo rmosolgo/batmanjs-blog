@@ -7,5 +7,8 @@ class App.Comment extends Batman.Model
   @belongsToCurrentUser()
   @encodesTimestamps()
 
+  @accessor 'createdAtFormatted', ->
+    @get('created_at')?.toDateString()
+
   @accessor 'canBeDeleted', ->
     @get('isOwnedByCurrentUser') || App.get('isAdmin')

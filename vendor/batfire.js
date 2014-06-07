@@ -138,8 +138,6 @@
         if (this.get('isScopedToCurrentUser')) {
           uid = this.get('isNew') ? Batman.currentApp.get('currentUser.uid') : this.get('created_by_uid');
           if (uid == null) {
-            debugger;
-            console.log(this.toJSON());
             throw "" + firebaseClass + " " + (this.get("id") || 'record') + " is scoped to currentUser -- you must be logged in to access them!";
           }
           children.push('scoped');
@@ -243,7 +241,6 @@
         }
         return this.set(env.primaryKey, firebaseId);
       });
-      console.log("CREATING", env.subject.toJSON())
       return env.firebaseRef.set(env.subject.toJSON(), function(err) {
         if (err) {
           env.error = err;

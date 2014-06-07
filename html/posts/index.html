@@ -16,8 +16,8 @@
         <a data-showif='post.isOwnedByCurrentUser' class='btn btn-danger pull-right' data-event-click='destroyPost | withArguments post'>Delete</a>
       </div>
       <span class='text-muted col-sm-4'>
-        Posted
-        <span data-bind="post.created_at | timeago"></span>
+        Posted on
+        <span data-bind="post.createdAtFormatted"></span>
       </span>
     </div>
     <div class='row'>
@@ -30,4 +30,3 @@
     <a class='btn btn-default' data-route='routes.posts.new'>New Post</a>
   </div>
 </div>
-

@@ -8,3 +8,6 @@ class App.Post extends Batman.Model
   @validate 'content', minLength: 25
   @belongsToCurrentUser(ownership: true)
   @encodesTimestamps()
+
+  @accessor 'createdAtFormatted', ->
+    @get('created_at')?.toDateString()

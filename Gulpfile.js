@@ -1,7 +1,9 @@
 var gulp = require('gulp');
 var PRELOAD_TEMPLATES = false
 
-gulp.task('default', ['harp', 'spec'], function(){
+var backgroundTasks = ['server', 'spec'] // remove 'spec' if you don't want to run karma
+
+gulp.task('default', backgroundTasks, function(){
   var tasks = ["build"]
   gulp.watch('./**/*.coffee', tasks)
   gulp.watch('./**/*.html', tasks)
@@ -61,7 +63,7 @@ var startHarp = function(port){
   })
 }
 
-gulp.task("harp", function(){
+gulp.task("server", function(){
   startHarp(HARP_PORT)
   true
 })
