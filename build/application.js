@@ -11,14 +11,16 @@
       return App.__super__.constructor.apply(this, arguments);
     }
 
-    App.root('greetings#index');
+    App.root('posts#index');
 
-    App.resources('greetings');
+    App.resources('posts');
 
-    App.syncsWithFirebase("batfire-example");
+    App.syncsWithFirebase("rm-batmanjs-blog");
 
-    App.on('run', function() {
-      return console.warn("Add your firebase key to ./app.coffee, then remove this warning!");
+    App.authorizesWithFirebase();
+
+    App.classAccessor('isAdmin', function() {
+      return this.get('currentUser.uid') === "github:2231765";
     });
 
     return App;
@@ -28,6 +30,42 @@
   $(function() {
     return App.run();
   });
+
+  App.Comment = (function(_super) {
+    __extends(Comment, _super);
+
+    function Comment() {
+      return Comment.__super__.constructor.apply(this, arguments);
+    }
+
+    Comment.resourceName = 'comment';
+
+    Comment.persist(BatFire.Storage);
+
+    Comment.encode('content');
+
+    Comment.belongsTo('post');
+
+    Comment.validate('content', {
+      presence: true
+    });
+
+    Comment.belongsToCurrentUser();
+
+    Comment.encodesTimestamps();
+
+    Comment.accessor('createdAtFormatted', function() {
+      var _ref;
+      return (_ref = this.get('created_at')) != null ? _ref.toDateString() : void 0;
+    });
+
+    Comment.accessor('canBeDeleted', function() {
+      return this.get('isOwnedByCurrentUser') || App.get('isAdmin');
+    });
+
+    return Comment;
+
+  })(Batman.Model);
 
   App.Greeting = (function(_super) {
     __extends(Greeting, _super);
@@ -50,6 +88,46 @@
 
   })(Batman.Model);
 
+  App.Post = (function(_super) {
+    __extends(Post, _super);
+
+    function Post() {
+      return Post.__super__.constructor.apply(this, arguments);
+    }
+
+    Post.resourceName = 'post';
+
+    Post.persist(BatFire.Storage);
+
+    Post.encode('title', 'content');
+
+    Post.hasMany('comments', {
+      inverseOf: 'post'
+    });
+
+    Post.validate('title', {
+      presence: true
+    });
+
+    Post.validate('content', {
+      minLength: 25
+    });
+
+    Post.belongsToCurrentUser({
+      ownership: true
+    });
+
+    Post.encodesTimestamps();
+
+    Post.accessor('createdAtFormatted', function() {
+      var _ref;
+      return (_ref = this.get('created_at')) != null ? _ref.toDateString() : void 0;
+    });
+
+    return Post;
+
+  })(Batman.Model);
+
   App.ApplicationController = (function(_super) {
     __extends(ApplicationController, _super);
 
@@ -61,44 +139,72 @@
 
   })(Batman.Controller);
 
-  App.GreetingsController = (function(_super) {
-    __extends(GreetingsController, _super);
+  App.PostsController = (function(_super) {
+    __extends(PostsController, _super);
 
-    function GreetingsController() {
-      return GreetingsController.__super__.constructor.apply(this, arguments);
+    function PostsController() {
+      return PostsController.__super__.constructor.apply(this, arguments);
     }
 
-    GreetingsController.prototype.routingKey = 'greetings';
+    PostsController.prototype.routingKey = 'posts';
 
-    GreetingsController.prototype.index = function(params) {
-      return this.set('exampleGreeting', new App.Greeting({
-        message: "Warmest welcome",
-        title: "Dr.",
-        fullName: "Lucius Fox"
-      }));
+    PostsController.prototype.index = function() {
+      return this.set('posts', App.Post.get('all.sortedByDescending.created_at'));
     };
 
-    GreetingsController.prototype.show = function(params) {
-      return App.Greeting.find(params.id, (function(_this) {
+    PostsController.prototype["new"] = function() {
+      return this.set('post', new App.Post);
+    };
+
+    PostsController.prototype.show = function(params) {
+      return App.Post.find(params.id, (function(_this) {
         return function(err, record) {
-          return _this.set('greeting', record);
+          if (err != null) {
+            throw err;
+          }
+          return _this.set('post', record);
         };
       })(this));
     };
 
-    GreetingsController.prototype.edit = function(params) {
-      return App.Greeting.find(params.id, (function(_this) {
+    PostsController.prototype.edit = function(params) {
+      return App.Post.find(params.id, (function(_this) {
         return function(err, record) {
-          return _this.set('greeting', record.transaction());
+          if (err != null) {
+            throw err;
+          }
+          return _this.set('post', record.transaction());
         };
       })(this));
     };
 
-    GreetingsController.prototype["new"] = function(params) {
-      return this.set('greeting', new App.Greeting);
+    PostsController.prototype.savePost = function(post) {
+      return post.save((function(_this) {
+        return function(err, record) {
+          if (err) {
+            if (!(err instanceof Batman.ErrorsSet)) {
+              throw err;
+            }
+          } else {
+            return _this.redirect({
+              action: "index"
+            });
+          }
+        };
+      })(this));
     };
 
-    return GreetingsController;
+    PostsController.prototype.destroyPost = function(post) {
+      return post.destroy((function(_this) {
+        return function(err, record) {
+          return _this.redirect({
+            action: "index"
+          });
+        };
+      })(this));
+    };
+
+    return PostsController;
 
   })(App.ApplicationController);
 
@@ -110,6 +216,45 @@
     }
 
     return GreetingsIndexView;
+
+  })(Batman.View);
+
+  App.PostsShowView = (function(_super) {
+    __extends(PostsShowView, _super);
+
+    function PostsShowView() {
+      return PostsShowView.__super__.constructor.apply(this, arguments);
+    }
+
+    PostsShowView.prototype.viewWillAppear = function() {
+      return this._resetComment();
+    };
+
+    PostsShowView.prototype.saveComment = function(comment) {
+      comment.set('post', this.get('controller.post'));
+      return comment.save((function(_this) {
+        return function(err, record) {
+          if (err != null) {
+            throw err;
+          }
+          return _this._resetComment();
+        };
+      })(this));
+    };
+
+    PostsShowView.prototype._resetComment = function() {
+      return this.set('newComment', new App.Comment);
+    };
+
+    PostsShowView.prototype.destroyComment = function(comment) {
+      return comment.destroy(function(err, r) {
+        if (err != null) {
+          throw err;
+        }
+      });
+    };
+
+    return PostsShowView;
 
   })(Batman.View);
 

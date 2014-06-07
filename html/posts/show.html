@@ -1,0 +1,64 @@
+<div class='row'>
+  <div class='col-sm-12'>
+    <h1 class='page-header'>
+      <span data-bind='post.title'></span>
+      <small data-bind='post.createdAtFormatted'></small>
+    </h1>
+  </div>
+</div>
+
+<div class='row'>
+  <p class='col-sm-12' data-bind='post.content'></p>
+</div>
+
+<div class='row'>
+  <div class='col-sm-12'>
+    <h3> Comments </h3>
+  </div>
+</div>
+
+<div class='row'>
+  <ul class='list-unstyled'>
+    <!-- render comments: -->
+    <li data-foreach-comment='post.comments' >
+      <p class='col-sm-4'>
+        <strong class='pull-right'>
+          On <span data-bind='comment.createdAtFormatted'></span>, <span data-bind='comment.created_by_username'></span> said:
+        </strong>
+      </p>
+      <p class='col-sm-6' data-bind='comment.content'></p>
+      <div class='col-sm-2' data-showif='comment.canBeDeleted'>
+        <a class='btn btn-danger btn-xs' data-event-click='destroyComment | withArguments comment'> Delete </a>
+      </div>
+    </li>
+    <!-- "design" for empty state -->
+    <li class='col-sm-12' data-showif='post.comments.isEmpty'>
+      <p class='text-muted'>No comments yet!</p>
+    </li>
+  </ul>
+</div>
+
+<div class='row' data-showif='loggedOut'>
+  <div class='col-sm-12'>
+    <div class='well'>
+      <p>You must be <a data-event-click='login'>logged in</a> to leave a comment!</p>
+    </div>
+  </div>
+</div>
+
+<div class='row' data-showif='loggedIn'>
+  <div class='col-sm-12'>
+    <form data-formfor-comment='newComment' data-event-submit='saveComment | withArguments newComment'>
+      <div class='form-group'>
+        <label>New Comment:</label>
+        <textarea
+          class='form-control'
+          data-bind='newComment.content'
+          data-bind-placeholder='"Leave a comment as " | append currentUser.username | append "..."'
+          >
+        </textarea>
+      </div>
+      <input type='submit' class='btn btn-primary' value='Leave a comment' />
+    </form>
+  </div>
+</div>

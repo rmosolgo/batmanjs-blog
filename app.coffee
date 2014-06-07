@@ -1,11 +1,12 @@
 Batman.config.usePushState = false # harp won't play well with pushState routes
 
 class @App extends Batman.App
-  @root 'greetings#index'
-  @resources 'greetings'
+  @root 'posts#index'
+  @resources 'posts'
 
-  @syncsWithFirebase "batfire-example" # <= your firebase key here (see rmosolgo/batfire for more info)
+  @syncsWithFirebase "rm-batmanjs-blog" # <= your firebase key here (see rmosolgo/batfire for more info)
+  @authorizesWithFirebase()
 
-  @on 'run', -> console.warn "Add your firebase key to ./app.coffee, then remove this warning!"
+  @classAccessor 'isAdmin', -> @get('currentUser.uid') is "github:2231765"
 
 $ -> App.run()
