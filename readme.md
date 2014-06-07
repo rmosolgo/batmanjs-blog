@@ -9,6 +9,6 @@ Some interesting parts:
 - __The App:__ [app.coffee](https://github.com/rmosolgo/batmanjs-blog/blob/master/app.coffee) (routes)
 - __Models:__ [Post](https://github.com/rmosolgo/batmanjs-blog/blob/master/models/post.coffee), [Comment](https://github.com/rmosolgo/batmanjs-blog/blob/master/models/comment.coffee)
 - __Controllers:__ [PostsController](https://github.com/rmosolgo/batmanjs-blog/blob/master/controllers/posts_controller.coffee)
-- __HTML:__ [layout](https://github.com/rmosolgo/batmanjs-blog/blob/master/index.html), [post templates](https://github.com/rmosolgo/batmanjs-blog/tree/master/html/posts), [navbar template](https://github.com/rmosolgo/batmanjs-blog/blob/master/html/navbar.html)
+- __HTML:__ [layout](https://github.com/rmosolgo/batmanjs-blog/blob/master/index.html), [post templates](https://github.com/rmosolgo/batmanjs-blog/tree/master/html/posts)
 - __Custom Views:__ [PostsShowView](https://github.com/rmosolgo/batmanjs-blog/blob/master/views/posts/show.coffee) (handles comments)
 - [Firebase security rules](https://github.com/rmosolgo/batmanjs-blog/blob/master/config/security_rules.json)
